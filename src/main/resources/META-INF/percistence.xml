@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+                                 http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
+             version="2.2">
+  
+  <persistence-unit name="prg03persistencia" transaction-type="RESOURCE_LOCAL">
+    
+    <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+    <!-- Adicione aqui suas entidades manualmente ou use auto-scan se o container permitir -->
+
+    <properties>
+      <!-- Conexão com o banco de dados -->
+      <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/luanpersistencia?useTimezone=true&amp;serverTimezone=UTC"/>
+      <property name="javax.persistence.jdbc.user" value="root"/>
+      <property name="javax.persistence.jdbc.password" value="root"/>
+
+      <!-- Dialeto do Hibernate para MySQL 8 -->
+      <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
+
+      <!-- Atualiza o esquema do banco automaticamente -->
+      <property name="hibernate.hbm2ddl.auto" value="update"/>
+
+      <!-- Mostrar SQL no console -->
+      <property name="hibernate.show_sql" value="true"/>
+      <property name="hibernate.format_sql" value="true"/>
+
+      <!-- Para logar os tipos dos parâmetros (como TRACE no Spring) -->
+      <property name="hibernate.type" value="trace"/>
+
+      <!-- Configuração de LOB -->
+      <property name="hibernate.jdbc.lob.non_contextual_creation" value="true"/>
+    </properties>
+    
+  </persistence-unit>
+
+</persistence>
