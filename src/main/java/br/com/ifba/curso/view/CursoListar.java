@@ -4,17 +4,61 @@
  */
 package br.com.ifba.curso.view;
 
+import br.com.ifba.curso.entity.Curso;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+import java.util.List;
+import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author a1591
  */
+
+
 public class CursoListar extends javax.swing.JFrame {
 
+    
+    public void carregarTabela() {
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("prg03persistencia");
+    EntityManager em = emf.createEntityManager();
+
+    try {
+        List<Curso> cursos = em.createQuery("SELECT c FROM Curso c", Curso.class).getResultList();
+
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0);
+
+        for (Curso curso : cursos) {
+            Object[] linha = {
+                curso.getId(),
+                curso.getNome(),
+                curso.getCodigoCurso(),
+                curso.isAtivo()
+            };
+            model.addRow(linha);
+        }
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Erro ao carregar cursos: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+    } finally {
+        em.close();
+        emf.close();
+    }
+}
+    
+    
     /**
      * Creates new form CursoListar
      */
     public CursoListar() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        carregarTabela();
     }
 
     /**
@@ -28,7 +72,6 @@ public class CursoListar extends javax.swing.JFrame {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
-        buttonLerTodosCursos = new javax.swing.JToggleButton();
         buttonAtualizarCurso = new javax.swing.JToggleButton();
         buttonDeletarCurso = new javax.swing.JToggleButton();
         buttonCriarNovoCurso = new javax.swing.JToggleButton();
@@ -38,23 +81,28 @@ public class CursoListar extends javax.swing.JFrame {
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "ID", "Nome", "Codigo-Curso", "Ativo"
             }
-        ));
-        jScrollPane1.setViewportView(jTable1);
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Boolean.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
 
-        buttonLerTodosCursos.setText("Ler Todos Cursos");
-        buttonLerTodosCursos.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonLerTodosCursosActionPerformed(evt);
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
             }
         });
+        jScrollPane1.setViewportView(jTable1);
 
         buttonAtualizarCurso.setText("Atualizar Curso");
         buttonAtualizarCurso.addActionListener(new java.awt.event.ActionListener() {
@@ -77,7 +125,7 @@ public class CursoListar extends javax.swing.JFrame {
             }
         });
 
-        jTextField1.setText("Procurar...");
+        jTextField1.setText("Procurar por ID");
         jTextField1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField1ActionPerformed(evt);
@@ -89,13 +137,12 @@ public class CursoListar extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(73, 73, 73)
+                .addGap(66, 66, 66)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 643, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 57, Short.MAX_VALUE)
+                .addGap(64, 64, 64)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jTextField1)
-                    .addComponent(buttonLerTodosCursos, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(buttonAtualizarCurso, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(buttonAtualizarCurso, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(buttonDeletarCurso, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(buttonCriarNovoCurso, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(51, 51, 51))
@@ -103,45 +150,251 @@ public class CursoListar extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(53, Short.MAX_VALUE)
+                .addContainerGap(31, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(115, 115, 115)
                         .addComponent(buttonCriarNovoCurso, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(buttonLerTodosCursos, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(buttonAtualizarCurso, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(buttonDeletarCurso, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(159, 159, 159))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(39, Short.MAX_VALUE))))
+                        .addComponent(buttonDeletarCurso, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(43, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void buttonLerTodosCursosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonLerTodosCursosActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_buttonLerTodosCursosActionPerformed
-
     private void buttonAtualizarCursoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAtualizarCursoActionPerformed
         // TODO add your handling code here:
+        
+         int linhaSelecionada = jTable1.getSelectedRow();
+
+        if (linhaSelecionada == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione um curso para atualizar.");
+            return;
+        }
+
+        // Pega o ID da linha selecionada (assumindo que está na primeira coluna)
+        Long idCurso = (Long) jTable1.getValueAt(linhaSelecionada, 0);
+
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("prg03persistencia");
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            Curso curso = em.find(Curso.class, idCurso);
+
+            if (curso == null) {
+                JOptionPane.showMessageDialog(this, "Curso não encontrado no banco.");
+                return;
+            }
+
+            // Cria campos preenchidos com os dados atuais
+            JTextField campoNome = new JTextField(curso.getNome());
+            JTextField campoCodigo = new JTextField(curso.getCodigoCurso());
+            JCheckBox checkAtivo = new JCheckBox("Curso Ativo", curso.isAtivo());
+
+            Object[] campos = {
+                "Nome:", campoNome,
+                "Código do Curso:", campoCodigo,
+                checkAtivo
+            };
+
+            int opcao = JOptionPane.showConfirmDialog(
+                null,
+                campos,
+                "Atualizar Curso",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+            );
+
+            if (opcao == JOptionPane.OK_OPTION) {
+                // Atualiza os dados
+                em.getTransaction().begin();
+                curso.setNome(campoNome.getText());
+                curso.setCodigoCurso(campoCodigo.getText());
+                curso.setAtivo(checkAtivo.isSelected());
+                em.getTransaction().commit();
+
+                JOptionPane.showMessageDialog(this, "Curso atualizado com sucesso!");
+                carregarTabela();
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao atualizar curso: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            em.close();
+            emf.close();
+        }
+        
     }//GEN-LAST:event_buttonAtualizarCursoActionPerformed
 
     private void buttonDeletarCursoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeletarCursoActionPerformed
         // TODO add your handling code here:
+
+                int linhaSelecionada = jTable1.getSelectedRow();
+
+          if (linhaSelecionada == -1) {
+              JOptionPane.showMessageDialog(this, "Selecione um curso para deletar.");
+              return;
+          }
+
+          // Pega o ID do curso na primeira coluna (ajuste se for outra coluna)
+          Long idCurso = null;
+          Object valorId = jTable1.getValueAt(linhaSelecionada, 0);
+          if (valorId instanceof Long) {
+              idCurso = (Long) valorId;
+          } else if (valorId instanceof Integer) {
+              // Caso venha como Integer do banco, converte para Long
+              idCurso = ((Integer) valorId).longValue();
+          } else {
+              JOptionPane.showMessageDialog(this, "ID do curso inválido.");
+              return;
+          }
+
+          int confirm = JOptionPane.showConfirmDialog(this,
+              "Tem certeza que deseja excluir o curso selecionado?",
+              "Confirmar exclusão",
+              JOptionPane.YES_NO_OPTION);
+
+          if (confirm != JOptionPane.YES_OPTION) {
+              return; // Cancelou exclusão
+          }
+
+          EntityManagerFactory emf = Persistence.createEntityManagerFactory("prg03persistencia");
+          EntityManager em = emf.createEntityManager();
+
+          try {
+              Curso curso = em.find(Curso.class, idCurso);
+
+              if (curso == null) {
+                  JOptionPane.showMessageDialog(this, "Curso não encontrado no banco.");
+                  return;
+              }
+
+              em.getTransaction().begin();
+              em.remove(curso);
+              em.getTransaction().commit();
+
+              JOptionPane.showMessageDialog(this, "Curso excluído com sucesso!");
+              carregarTabela();
+
+          } catch (Exception e) {
+              JOptionPane.showMessageDialog(this, "Erro ao excluir curso: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+              if (em.getTransaction().isActive()) {
+                  em.getTransaction().rollback();
+              }
+          } finally {
+              em.close();
+              emf.close();
+          }
+
     }//GEN-LAST:event_buttonDeletarCursoActionPerformed
 
     private void buttonCriarNovoCursoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCriarNovoCursoActionPerformed
         // TODO add your handling code here:
+        
+        
+        JTextField campoNome = new JTextField();
+        JTextField campoCodigo = new JTextField();
+        JCheckBox checkAtivo = new JCheckBox("Curso Ativo", true); // Marcado como padrão
+
+        Object[] campos = {
+            "Nome:", campoNome,
+            "Código do Curso:", campoCodigo,
+            checkAtivo
+        };
+
+        int opcao = JOptionPane.showConfirmDialog(
+            null,
+            campos,
+            "Adicionar Novo Curso",
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (opcao == JOptionPane.OK_OPTION) {
+            String nome = campoNome.getText();
+            String codigo = campoCodigo.getText();
+            boolean ativo = checkAtivo.isSelected(); // Pega o valor do checkbox
+
+            try {
+                Curso curso = new Curso();
+                curso.setNome(nome);
+                curso.setCodigoCurso(codigo);
+                curso.setAtivo(ativo); // Define com base no checkbox
+
+                // PERSISTÊNCIA COM JPA
+                EntityManagerFactory emf = Persistence.createEntityManagerFactory("prg03persistencia"); // Verifique se é esse o nome
+                EntityManager em = emf.createEntityManager();
+
+                em.getTransaction().begin();
+                em.persist(curso);
+                em.getTransaction().commit();
+
+                em.close();
+                emf.close();
+
+                JOptionPane.showMessageDialog(null, "Curso salvo com sucesso!");
+                carregarTabela();
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Erro ao salvar curso: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+
     }//GEN-LAST:event_buttonCriarNovoCursoActionPerformed
 
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
         // TODO add your handling code here:
+        
+         String textoBusca = jTextField1.getText().trim();
+
+        if (textoBusca.isEmpty()) {
+            // Se o campo estiver vazio, carrega toda a tabela normalmente
+            carregarTabela();
+            return;
+        }
+
+        Long idBusca = null;
+        try {
+            idBusca = Long.parseLong(textoBusca);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Por favor, digite um ID válido (número).");
+            return;
+        }
+
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("prg03persistencia");
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            Curso curso = em.find(Curso.class, idBusca);
+
+            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+            model.setRowCount(0); // limpa a tabela
+
+            if (curso != null) {
+                Object[] linha = {
+                    curso.getId(),
+                    curso.getNome(),
+                    curso.getCodigoCurso(),
+                    curso.isAtivo()
+                };
+                model.addRow(linha);
+            } else {
+                JOptionPane.showMessageDialog(this, "Nenhum curso encontrado com o ID informado.");
+                carregarTabela(); // opcional: volta a mostrar todos os cursos
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao buscar curso: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            em.close();
+            emf.close();
+        }
     }//GEN-LAST:event_jTextField1ActionPerformed
 
     /**
@@ -183,7 +436,6 @@ public class CursoListar extends javax.swing.JFrame {
     private javax.swing.JToggleButton buttonAtualizarCurso;
     private javax.swing.JToggleButton buttonCriarNovoCurso;
     private javax.swing.JToggleButton buttonDeletarCurso;
-    private javax.swing.JToggleButton buttonLerTodosCursos;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
     private javax.swing.JTextField jTextField1;
