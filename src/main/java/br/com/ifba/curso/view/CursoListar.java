@@ -4,10 +4,13 @@
  */
 package br.com.ifba.curso.view;
 
+import br.com.ifba.curso.dao.CursoDao;
+import br.com.ifba.curso.dao.CursoIDao;
 import br.com.ifba.curso.entity.Curso;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import java.awt.HeadlessException;
 import java.util.List;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
@@ -20,10 +23,11 @@ import javax.swing.table.DefaultTableModel;
  */
 
 
-public class CursoListar extends javax.swing.JFrame {
+public final class CursoListar extends javax.swing.JFrame {
 
-    
+    // Metodo responsavel por carregar a tabela
     public void carregarTabela() {
+        // Nesse caso em especifico abrir uma trasação só para atualizar
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("prg03persistencia");
     EntityManager em = emf.createEntityManager();
 
@@ -170,7 +174,7 @@ public class CursoListar extends javax.swing.JFrame {
     private void buttonAtualizarCursoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAtualizarCursoActionPerformed
         // TODO add your handling code here:
         
-         int linhaSelecionada = jTable1.getSelectedRow();
+        int linhaSelecionada = jTable1.getSelectedRow();
 
         if (linhaSelecionada == -1) {
             JOptionPane.showMessageDialog(this, "Selecione um curso para atualizar.");
@@ -180,11 +184,9 @@ public class CursoListar extends javax.swing.JFrame {
         // Pega o ID da linha selecionada (assumindo que está na primeira coluna)
         Long idCurso = (Long) jTable1.getValueAt(linhaSelecionada, 0);
 
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("prg03persistencia");
-        EntityManager em = emf.createEntityManager();
-
         try {
-            Curso curso = em.find(Curso.class, idCurso);
+            CursoIDao cursobusca = new CursoDao();
+            Curso curso = cursobusca.findById(idCurso);
 
             if (curso == null) {
                 JOptionPane.showMessageDialog(this, "Curso não encontrado no banco.");
@@ -211,22 +213,19 @@ public class CursoListar extends javax.swing.JFrame {
             );
 
             if (opcao == JOptionPane.OK_OPTION) {
-                // Atualiza os dados
-                em.getTransaction().begin();
+                // Perciste no banco usando o DAO
                 curso.setNome(campoNome.getText());
                 curso.setCodigoCurso(campoCodigo.getText());
                 curso.setAtivo(checkAtivo.isSelected());
-                em.getTransaction().commit();
+                
+                cursobusca.update(curso); // <-- ESSENCIAL
 
                 JOptionPane.showMessageDialog(this, "Curso atualizado com sucesso!");
                 carregarTabela();
             }
 
-        } catch (Exception e) {
+        } catch (HeadlessException e) {
             JOptionPane.showMessageDialog(this, "Erro ao atualizar curso: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            em.close();
-            emf.close();
         }
         
     }//GEN-LAST:event_buttonAtualizarCursoActionPerformed
@@ -234,7 +233,7 @@ public class CursoListar extends javax.swing.JFrame {
     private void buttonDeletarCursoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeletarCursoActionPerformed
         // TODO add your handling code here:
 
-                int linhaSelecionada = jTable1.getSelectedRow();
+        int linhaSelecionada = jTable1.getSelectedRow();
 
           if (linhaSelecionada == -1) {
               JOptionPane.showMessageDialog(this, "Selecione um curso para deletar.");
@@ -263,32 +262,23 @@ public class CursoListar extends javax.swing.JFrame {
               return; // Cancelou exclusão
           }
 
-          EntityManagerFactory emf = Persistence.createEntityManagerFactory("prg03persistencia");
-          EntityManager em = emf.createEntityManager();
-
           try {
-              Curso curso = em.find(Curso.class, idCurso);
-
+              
+              CursoIDao cursOoperacao = new CursoDao();
+              Curso curso = cursOoperacao.findById(idCurso);
+              
               if (curso == null) {
                   JOptionPane.showMessageDialog(this, "Curso não encontrado no banco.");
                   return;
               }
-
-              em.getTransaction().begin();
-              em.remove(curso);
-              em.getTransaction().commit();
+              // Detleta usando os DAO
+              cursOoperacao.delete(curso);
 
               JOptionPane.showMessageDialog(this, "Curso excluído com sucesso!");
               carregarTabela();
 
-          } catch (Exception e) {
+          } catch (HeadlessException e) {
               JOptionPane.showMessageDialog(this, "Erro ao excluir curso: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-              if (em.getTransaction().isActive()) {
-                  em.getTransaction().rollback();
-              }
-          } finally {
-              em.close();
-              emf.close();
           }
 
     }//GEN-LAST:event_buttonDeletarCursoActionPerformed
@@ -325,22 +315,16 @@ public class CursoListar extends javax.swing.JFrame {
                 curso.setNome(nome);
                 curso.setCodigoCurso(codigo);
                 curso.setAtivo(ativo); // Define com base no checkbox
-
-                // PERSISTÊNCIA COM JPA
-                EntityManagerFactory emf = Persistence.createEntityManagerFactory("prg03persistencia"); // Verifique se é esse o nome
-                EntityManager em = emf.createEntityManager();
-
-                em.getTransaction().begin();
-                em.persist(curso);
-                em.getTransaction().commit();
-
-                em.close();
-                emf.close();
+                
+                // Salva usando o DAO
+                CursoIDao cursoDao = new CursoDao();
+                cursoDao.save(curso);
+                
 
                 JOptionPane.showMessageDialog(null, "Curso salvo com sucesso!");
                 carregarTabela();
 
-            } catch (Exception e) {
+            } catch (HeadlessException e) {
                 JOptionPane.showMessageDialog(null, "Erro ao salvar curso: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
@@ -361,17 +345,15 @@ public class CursoListar extends javax.swing.JFrame {
 
         Long idBusca = null;
         try {
-            idBusca = Long.parseLong(textoBusca);
+            idBusca = Long.valueOf(textoBusca);
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Por favor, digite um ID válido (número).");
             return;
         }
 
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("prg03persistencia");
-        EntityManager em = emf.createEntityManager();
-
-        try {
-            Curso curso = em.find(Curso.class, idBusca);
+        try { // Realiza a busca usando o Dao 
+            CursoIDao cursoBuscar = new CursoDao();
+            Curso curso = cursoBuscar.findById(idBusca);
 
             DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
             model.setRowCount(0); // limpa a tabela
@@ -389,11 +371,8 @@ public class CursoListar extends javax.swing.JFrame {
                 carregarTabela(); // opcional: volta a mostrar todos os cursos
             }
 
-        } catch (Exception e) {
+        } catch (HeadlessException e) {
             JOptionPane.showMessageDialog(this, "Erro ao buscar curso: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            em.close();
-            emf.close();
         }
     }//GEN-LAST:event_jTextField1ActionPerformed
 
@@ -425,10 +404,8 @@ public class CursoListar extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new CursoListar().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new CursoListar().setVisible(true);
         });
     }
 
