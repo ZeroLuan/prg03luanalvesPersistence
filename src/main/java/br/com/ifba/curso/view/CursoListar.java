@@ -4,8 +4,8 @@
  */
 package br.com.ifba.curso.view;
 
-import br.com.ifba.curso.dao.CursoDao;
-import br.com.ifba.curso.dao.CursoIDao;
+import br.com.ifba.curso.controller.CursoController;
+import br.com.ifba.curso.controller.CursoIController;
 import br.com.ifba.curso.entity.Curso;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -24,37 +24,8 @@ import javax.swing.table.DefaultTableModel;
 
 
 public final class CursoListar extends javax.swing.JFrame {
-
-    // Metodo responsavel por carregar a tabela
-    public void carregarTabela() {
-        // Nesse caso em especifico abrir uma trasação só para atualizar
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("prg03persistencia");
-    EntityManager em = emf.createEntityManager();
-
-    try {
-        List<Curso> cursos = em.createQuery("SELECT c FROM Curso c", Curso.class).getResultList();
-
-        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-        model.setRowCount(0);
-
-        for (Curso curso : cursos) {
-            Object[] linha = {
-                curso.getId(),
-                curso.getNome(),
-                curso.getCodigoCurso(),
-                curso.isAtivo()
-            };
-            model.addRow(linha);
-        }
-
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Erro ao carregar cursos: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-    } finally {
-        em.close();
-        emf.close();
-    }
-}
     
+    public CursoIController cursoController = new CursoController();
     
     /**
      * Creates new form CursoListar
@@ -63,6 +34,31 @@ public final class CursoListar extends javax.swing.JFrame {
         initComponents();
         this.setLocationRelativeTo(null);
         carregarTabela();
+    }
+    
+    public void carregarTabela() {
+ 
+        try {
+            List<Curso> cursos = cursoController.findAll();
+            
+            System.out.println("Cursos encontrados: " + cursos.size()); 
+
+            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+            model.setRowCount(0);
+
+            for (Curso curso : cursos) {
+                Object[] linha = {
+                    curso.getId(),
+                    curso.getNome(),
+                    curso.getCodigoCurso(),
+                    curso.isAtivo()
+                };
+                model.addRow(linha);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar cursos: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
@@ -185,8 +181,9 @@ public final class CursoListar extends javax.swing.JFrame {
         Long idCurso = (Long) jTable1.getValueAt(linhaSelecionada, 0);
 
         try {
-            CursoIDao cursobusca = new CursoDao();
-            Curso curso = cursobusca.findById(idCurso);
+           
+            //Buscando pelo curso!
+            Curso curso = cursoController.findById(idCurso);
 
             if (curso == null) {
                 JOptionPane.showMessageDialog(this, "Curso não encontrado no banco.");
@@ -218,7 +215,7 @@ public final class CursoListar extends javax.swing.JFrame {
                 curso.setCodigoCurso(campoCodigo.getText());
                 curso.setAtivo(checkAtivo.isSelected());
                 
-                cursobusca.update(curso); // <-- ESSENCIAL
+                cursoController.update(curso); // <-- ESSENCIAL
 
                 JOptionPane.showMessageDialog(this, "Curso atualizado com sucesso!");
                 carregarTabela();
@@ -264,15 +261,15 @@ public final class CursoListar extends javax.swing.JFrame {
 
           try {
               
-              CursoIDao cursOoperacao = new CursoDao();
-              Curso curso = cursOoperacao.findById(idCurso);
+             
+              Curso curso = cursoController.findById(idCurso);
               
               if (curso == null) {
                   JOptionPane.showMessageDialog(this, "Curso não encontrado no banco.");
                   return;
               }
-              // Detleta usando os DAO
-              cursOoperacao.delete(curso);
+              // Detleta usando as camadas
+              cursoController.delete(curso);
 
               JOptionPane.showMessageDialog(this, "Curso excluído com sucesso!");
               carregarTabela();
@@ -316,9 +313,9 @@ public final class CursoListar extends javax.swing.JFrame {
                 curso.setCodigoCurso(codigo);
                 curso.setAtivo(ativo); // Define com base no checkbox
                 
-                // Salva usando o DAO
-                CursoIDao cursoDao = new CursoDao();
-                cursoDao.save(curso);
+                // Salva usando as camadas
+               
+                cursoController.save(curso);
                 
 
                 JOptionPane.showMessageDialog(null, "Curso salvo com sucesso!");
@@ -351,9 +348,9 @@ public final class CursoListar extends javax.swing.JFrame {
             return;
         }
 
-        try { // Realiza a busca usando o Dao 
-            CursoIDao cursoBuscar = new CursoDao();
-            Curso curso = cursoBuscar.findById(idBusca);
+        try { 
+            // Realizando busca pelas camadas
+            Curso curso = cursoController.findById(idBusca);
 
             DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
             model.setRowCount(0); // limpa a tabela

@@ -55,8 +55,12 @@ public class GenericDao <Entity extends PersistenceEntity> implements GenericIDa
 
     @Override
     public List<Entity> findAll() {
-       return entityManager.createQuery(("from" + getTypeClass().getName())).getResultList();
+        String nomeClasse = getTypeClass().getSimpleName(); // Ex: "Curso"
+        return (List<Entity>) entityManager
+            .createQuery("from " + nomeClasse, getTypeClass())
+            .getResultList();
     }
+
 
     @Override
     public Entity findById(Long id) {
