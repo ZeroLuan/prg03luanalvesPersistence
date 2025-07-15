@@ -8,6 +8,7 @@ import br.com.ifba.curso.dao.CursoDao;
 import br.com.ifba.curso.dao.CursoIDao;
 import br.com.ifba.curso.entity.Curso;
 import br.com.ifba.infrastructure.util.StringUtil;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -56,7 +57,11 @@ public class CursoService implements CursoIService {
     // Retorna todos os cursos
     @Override
     public List<Curso> findAll() throws RuntimeException {
-        return cursoDao.findAll();
+        List<Curso> cursos = cursoDao.findAll();
+        if(cursos.isEmpty()){
+            return Collections.emptyList();
+        }
+        return cursos;
     }
     
     // Busca curso por ID com validação
