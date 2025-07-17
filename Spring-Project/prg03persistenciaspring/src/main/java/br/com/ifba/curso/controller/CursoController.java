@@ -14,7 +14,7 @@ import org.springframework.stereotype.Controller;
  *
  * @author Luan Alves
  */
-@Controller 
+@Controller // camada de entrada responsavel por trafegar os dados para a service, onde possui regras. 
 public class CursoController implements CursoIController {
     
     @Autowired

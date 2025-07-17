@@ -3,9 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package br.com.ifba.curso.service;
-
-import br.com.ifba.curso.dao.CursoIDao;
 import br.com.ifba.curso.entity.Curso;
+import br.com.ifba.curso.repository.CursoRepository;
 import br.com.ifba.infrastructure.util.StringUtil;
 import java.util.Collections;
 import java.util.List;
@@ -17,12 +16,12 @@ import org.springframework.stereotype.Service;
  * @author Luan Alves
  */
 
-@Service
+@Service // Camada responsavel pelas regras e conexão para operações relativas ao crud no banco de dados
 public class CursoService implements CursoIService {
     
     // DAO responsável pelo acesso ao banco
     @Autowired
-    private CursoIDao cursoDao;
+    private CursoRepository cursoRepository;
     
     // Salva um novo curso após validações
     @Override
@@ -35,7 +34,7 @@ public class CursoService implements CursoIService {
             throw new RuntimeException("Nome do curso não pode estar vazio.");
         }
 
-        return cursoDao.save(curso);
+        return cursoRepository.save(curso);
     }
     
     // Atualiza um curso existente após validar ID
@@ -45,7 +44,7 @@ public class CursoService implements CursoIService {
             throw new RuntimeException("Curso inválido para atualização.");
         }
 
-        return cursoDao.update(curso);
+        return cursoRepository.save(curso);
     }
     
     // Remove um curso após validar ID
@@ -55,13 +54,13 @@ public class CursoService implements CursoIService {
             throw new RuntimeException("Curso inválido para exclusão.");
         }
 
-        cursoDao.delete(curso);
+        cursoRepository.delete(curso);
     }
     
     // Retorna todos os cursos
     @Override
     public List<Curso> findAll() throws RuntimeException {
-        List<Curso> cursos = cursoDao.findAll();
+        List<Curso> cursos = cursoRepository.findAll();
         if(cursos.isEmpty()){
             return Collections.emptyList();
         }
@@ -75,7 +74,8 @@ public class CursoService implements CursoIService {
             throw new RuntimeException("ID inválido.");
         }
 
-        return cursoDao.findById(id);
+        return cursoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Curso não encontrado para o ID: " + id));
     }
     
 }

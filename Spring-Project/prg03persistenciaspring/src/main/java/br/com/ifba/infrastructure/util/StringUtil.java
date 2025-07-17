@@ -8,6 +8,8 @@ package br.com.ifba.infrastructure.util;
  *
  * @author Luan Alves
  */
+
+// aqui possui operações usuais para Strings.
 public class StringUtil {
         
     public static boolean isEmpty(String value) {

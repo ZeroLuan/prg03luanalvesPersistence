@@ -359,6 +359,7 @@ public final class CursoListar extends javax.swing.JFrame {
             DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
             model.setRowCount(0); // limpa a tabela
 
+            // verifica de o objeto é null
             if (curso != null) {
                 Object[] linha = {
                     curso.getId(),
